@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.total.unique.generator.entity.UniqueID;
 import com.total.unique.generator.repository.UniqueIDRepository;
 import com.total.unique.generator.service.UniqueIDGenerator;
+import com.total.unique.generator.service.UniqueIDUpdater;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,8 @@ public class GenerationController {
     @Autowired
     private UniqueIDRepository uniqueIDRepository;
 
-
+    @Autowired
+    private UniqueIDUpdater uniqueIDUpdater;
 
     @GetMapping("/{numberOfElements}")
     public Set<String> generate(@PathVariable final long numberOfElements) {
@@ -53,4 +55,9 @@ public class GenerationController {
         return result;
     }
 
+    @GetMapping("/update/{count}")
+    public void update(@PathVariable final int count) {
+        uniqueIDUpdater.batchUpdate(count);
+
+    }
 }
