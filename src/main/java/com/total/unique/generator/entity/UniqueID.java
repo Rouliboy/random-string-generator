@@ -1,5 +1,6 @@
 package com.total.unique.generator.entity;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
-@Table
+@Table(name = "UNIQUE_ID")
 @Entity
 @Data
 @AllArgsConstructor
@@ -30,6 +31,7 @@ public class UniqueID {
     }
 
     public enum Status {
-        NOT,PROCESSED
+        NOT,PROCESSED;
+
     }
 }

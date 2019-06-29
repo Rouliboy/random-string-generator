@@ -34,8 +34,8 @@ public class GenerationController {
     private UniqueIDUpdater uniqueIDUpdater;
 
     @GetMapping("/{numberOfElements}")
-    public Set<String> generate(@PathVariable final long numberOfElements) {
-        return generator.generate(numberOfElements);
+    public void generate(@PathVariable final long numberOfElements) {
+        generator.generate(numberOfElements);
     }
 
     @GetMapping("/count")
@@ -58,6 +58,5 @@ public class GenerationController {
     @GetMapping("/update/{count}")
     public void update(@PathVariable final int count) {
         uniqueIDUpdater.batchUpdate(count);
-
     }
 }

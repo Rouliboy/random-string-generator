@@ -1,5 +1,7 @@
 package com.total.unique.generator.service;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.total.unique.generator.entity.UniqueID;
 import com.total.unique.generator.repository.UniqueIDRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +11,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,7 +32,7 @@ public class UniqueIDUpdater {
     private UniqueIDRepository uniqueIDRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private AsyncUniqueIdUpdater asyncUniqueIdUpdater;
 
     public Set<String> generate(final long numberOfElements) {
         Set<String> result = new HashSet<>();
@@ -51,23 +57,37 @@ public class UniqueIDUpdater {
         return result;
     }
 
-    @Transactional
     public void batchUpdate(final int count) {
 
-        List<String> uniqueIds = uniqueIDRepository.findUniqueIdsNotInStatus(UniqueID.Status.PROCESSED, new PageRequest(0, count));
+        final int batchSize = 100_000;
+        log.info("Count={}", count);
+        int quotient = count / batchSize;
+        int reste = count % batchSize;
 
-        log.info("UNique ids = {}", uniqueIds);
+        List<Integer> list = new ArrayList<>();
 
-        String query = "update UNIQUE_ID set status = 'PROCESSED' where unique_id = ?";
-        jdbcTemplate.batchUpdate(query, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                preparedStatement.setString(1, uniqueIds.get(i));
-            }
+        for (int i = 0; i < quotient; ++i) {
+            list.add(batchSize);
+        }
+        if (reste > 0) {
+            list.add(reste);
+        }
 
-            @Override
-            public int getBatchSize() {
-                return uniqueIds.size();
+        log.info("Liste={}", list);
+        List<Future<Long>> results = new ArrayList<>();
+
+        list.forEach(l -> {
+            log.info("Updating ids");
+            results.add(asyncUniqueIdUpdater.update(l));
+        });
+        results.forEach(r -> {
+            try {
+                log.info("Getting result");
+                r.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         });
     }

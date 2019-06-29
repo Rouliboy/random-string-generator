@@ -18,5 +18,5 @@ public interface UniqueIDRepository extends JpaRepository<UniqueID, Long> {
     // Mandatory the FOR UPDATE (pessimistic_write) to lock row from reading
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "select u.uniqueId from UniqueID u where status <> :status")
-    List<String> findUniqueIdsNotInStatus(UniqueID.Status status, Pageable pageable);
+    List<String> findUniquesIdsNotWithStatus(UniqueID.Status status, Pageable pageable);
 }
