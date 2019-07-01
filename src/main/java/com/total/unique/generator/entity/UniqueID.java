@@ -7,19 +7,16 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
-@Table
+@Table(name = "unique_id_table")
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UniqueID {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @Column(unique = true)
+    @Column(unique = true, length = 10)
     @Size(min = 10, max = 10)
+    @Id
     private String uniqueId;
 
     @Enumerated(EnumType.STRING)

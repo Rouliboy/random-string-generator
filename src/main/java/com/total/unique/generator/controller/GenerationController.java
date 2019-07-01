@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.total.unique.generator.entity.UniqueID;
 import com.total.unique.generator.repository.UniqueIDRepository;
 import com.total.unique.generator.service.UniqueIDGenerator;
+import com.total.unique.generator.service.UniqueIdGeneratorLauncher;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("api/generate")
@@ -29,20 +29,23 @@ public class GenerationController {
     @Autowired
     private UniqueIDRepository uniqueIDRepository;
 
+    @Autowired
+    private UniqueIdGeneratorLauncher uniqueIdGeneratorLauncher;
+
 
 
     @GetMapping("/{numberOfElements}")
-    public Set<String> generate(@PathVariable final long numberOfElements) {
-        return generator.generate(numberOfElements);
+    public void generate(@PathVariable final long numberOfElements) {
+        generator.generate(numberOfElements);
     }
 
     @GetMapping("/count")
-    public Map<String, Long> generate() {
-        return ImmutableMap.of("nbElemnts", uniqueIDRepository.count());
+    public Map<String, Long> count() {
+        return ImmutableMap.of("nbElements", uniqueIDRepository.count());
     }
 
     @GetMapping("/fetch/{count}")
-    public List<UniqueID> fetch(@PathVariable final int count) {
+    public ImmutableMap<String, Integer> fetch(@PathVariable final int count) {
         Pageable topTen = new PageRequest(0, count);
 
         long start = System.currentTimeMillis();
@@ -50,7 +53,13 @@ public class GenerationController {
         long stop = System.currentTimeMillis();
         log.info("Took {}ms to fetch {} elements", stop - start, count);
 
-        return result;
+        return ImmutableMap.of("nbElementsFetched", result.size());
+    }
+
+    @GetMapping("/batch")
+    @Async
+    public void batch(){
+        uniqueIdGeneratorLauncher.load();
     }
 
 }
