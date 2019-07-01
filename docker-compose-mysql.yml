@@ -13,12 +13,12 @@ services:
     networks:
       random-network:
         aliases:
-            - phpmyadmin
+          - phpmyadmin
     depends_on:
-        - random-id-mysql
+      - random-id-mysql
     ports:
       - 8001:80
-      
+
   random-id-mysql:
     image: mariadb
     restart: always

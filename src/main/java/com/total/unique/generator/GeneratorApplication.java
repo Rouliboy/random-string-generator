@@ -6,15 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-
 @SpringBootApplication
 @EnableCaching
 @EnableAsync
 @Slf4j
 public class GeneratorApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(GeneratorApplication.class, args);
-	}
+  public static void main(final String[] args) {
+    SpringApplication.run(GeneratorApplication.class, args);
+  }
 
 }
