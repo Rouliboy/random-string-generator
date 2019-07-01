@@ -5,6 +5,7 @@ import com.total.unique.generator.entity.UniqueID;
 import com.total.unique.generator.repository.UniqueIDRepository;
 import com.total.unique.generator.service.UniqueIDGenerator;
 import com.total.unique.generator.service.UniqueIdGeneratorLauncher;
+import com.total.unique.generator.service.UniqueIDUpdater;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +33,8 @@ public class GenerationController {
     @Autowired
     private UniqueIdGeneratorLauncher uniqueIdGeneratorLauncher;
 
-
+    @Autowired
+    private UniqueIDUpdater uniqueIDUpdater;
 
     @GetMapping("/{numberOfElements}")
     public void generate(@PathVariable final long numberOfElements) {
@@ -62,4 +64,8 @@ public class GenerationController {
         uniqueIdGeneratorLauncher.load();
     }
 
+    @GetMapping("/update/{count}")
+    public void update(@PathVariable final int count) {
+        uniqueIDUpdater.batchUpdate(count);
+    }
 }
